@@ -9,7 +9,7 @@ def is_odd(x: int) -> bool:
     return bool(x & 1)
 
 
-def all_odd(*x: int) -> List[bool]:
+def all_odd(*x: int) -> bool:
     """checks if all the ints are odd
 
     :param x: the ints
