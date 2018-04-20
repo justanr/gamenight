@@ -1,0 +1,32 @@
+[run]
+branch = true
+source = gamenight
+omit =
+        __meta__.py
+parallel = true
+
+[paths]
+source =
+   src/gamenight/
+   .tox/*/lib/*/site-packages/gamenight/
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self\.debug:
+    if settings.DEBUG
+    raise NotImplementedError
+    if 0:
+    if False:
+    if __name__ == .__main__.:
+    @abstractmethod
+    return NotImplemented
+
+fail_under = 80
+precision = 2
+show_missing = true
+skip_covered = true
+
+[html]
+directory = tests/htmlcov
