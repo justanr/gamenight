@@ -1,3 +1,6 @@
+import ast
+import os
+
 from flask import Flask
 from flask_injector import FlaskInjector
 
@@ -7,8 +10,9 @@ from .extensions import db
 from .modules import GamenightModule
 
 
-def make_app():
+def make_app(config_path=None):
     app = Flask('gamenight.app')
+    setup_instance_path(app)
     configure_app(app)
     initialize_extensions(app)
     register_blueprints(app)
@@ -16,30 +20,55 @@ def make_app():
     return app
 
 
-def configure_app(app):
-    print("Configuring app...")
-    app.config['SQLALCHEMY_DATABASE_URI'
-               ] = 'sqlite:////home/anr/projects/gamenight/games.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+def setup_instance_path(app):
+    if not os.path.exists(app.instance_path):
+        os.makedirs(app.instance_path)
+
+
+def configure_app(app, config_path=None):
+    sources = app.config['CONFIG_SOURCES'] = {
+        'default': 'gamenight.app.config.DefaultGameNightConfig',
+        'envvar': 'GAMENIGHT_SETTINGS',
+        'config_path': config_path,
+        'envvar_prefix': 'GAMENIGHT_'
+    }
+    app.config.from_object(sources['default'])
+    app.config.from_envvar(sources['envvar'], silent=True)
+
+    if config_path is not None:
+        if isinstance(config, str):
+            app.config.from_pyfile(config_path)
+        else:
+            app.config.from_object(config_path)
+
+    app.config.update(
+        config_from_env('GAMENIGHT_', frozenset(['GAMENIGHT_SETTINGS']))
+    )
+
+
+def config_from_env(prefix, ignore=frozenset()):
+    config = {}
+    for key, value in os.environ.items():
+        if key.startswith(prefix):
+            try:
+                value = ast.literal_eval(value)
+            except:
+                pass
+            config[key.replace(prefix, '')] = value
+    return config
 
 
 def initialize_extensions(app):
-    print("Configuring extensions...")
     db.init_app(app)
 
 
 def register_blueprints(app):
-    print("Registering blueprints...")
     bps = [
         bp for bp in blueprints.__dict__.values()
         if isinstance(bp, GamenightBlueprint)
     ]
     for bp in bps:
-        print(f'registering {bp}')
         app.register_blueprint(bp)
 
-
 def finalize(app):
-    print("Finalizing app...")
-    print(f"Modules: {GamenightModule.__subclasses__()}")
     FlaskInjector(app, modules=GamenightModule.__subclasses__())

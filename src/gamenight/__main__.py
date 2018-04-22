@@ -1,8 +1,4 @@
-from .app.extensions import db
-from .app.factory import make_app
+from .cli import gamenight
 
-
-app = make_app()
-
-with app.app_context():
-    db.create_all()
+if __name__ == '__main__':
+    gamenight()

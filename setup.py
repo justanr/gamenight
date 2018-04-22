@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open('README.md', 'r') as f:
     readme = f.read()
@@ -23,5 +23,6 @@ if __name__ == "__main__":
         include_package_data=True,
         zip_safe=False,
         url="https://github.com/justanr/gamenight",
-        install_requires=install_requires
+        install_requires=install_requires,
+        entry_points={'console_scripts': ['gamenight=gamenight.cli:gamenight']}
     )
