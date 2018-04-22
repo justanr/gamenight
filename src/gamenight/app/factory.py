@@ -10,10 +10,10 @@ from .extensions import db
 from .modules import GamenightModule
 
 
-def make_app(config_path=None):
-    app = Flask('gamenight.app')
+def make_app(config_path=None, instance_path=None):
+    app = Flask('gamenight', instance_path=instance_path)
     setup_instance_path(app)
-    configure_app(app)
+    configure_app(app, config_path)
     initialize_extensions(app)
     register_blueprints(app)
     finalize(app)
@@ -35,10 +35,10 @@ def configure_app(app, config_path=None):
     app.config.from_object(sources['default'])
     app.config.from_envvar(sources['envvar'], silent=True)
 
-    if config_path is not None:
-        if isinstance(config, str):
+    if isinstance(config_path, str):
+        if os.path.exists(config_path):
             app.config.from_pyfile(config_path)
-        else:
+        elif os.path.sep not in config:
             app.config.from_object(config_path)
 
     app.config.update(
