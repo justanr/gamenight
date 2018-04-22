@@ -6,6 +6,7 @@ with open('README.md', 'r') as f:
 with open('CHANGELOG', 'r') as f:
     changelog = f.read()
 
+install_requires = []
 
 if __name__ == "__main__":
     setup(
@@ -22,4 +23,5 @@ if __name__ == "__main__":
         include_package_data=True,
         zip_safe=False,
         url="https://github.com/justanr/gamenight",
+        install_requires=install_requires
     )
