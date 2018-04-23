@@ -1,11 +1,14 @@
 import ast
 import os
+from pathlib import Path
+from types import ModuleType
 
 from flask import Flask
 from flask_injector import FlaskInjector
 
 from . import blueprints, modules
 from .blueprints import GamenightBlueprint
+from .config.find import config_from_env, config_from_path, getqualname
 from .extensions import db
 from .modules import GamenightModule
 
@@ -26,36 +29,45 @@ def setup_instance_path(app):
 
 
 def configure_app(app, config_path=None):
+    # track these to help deduce configuration issues
     sources = app.config['CONFIG_SOURCES'] = {
         'default': 'gamenight.app.config.DefaultGameNightConfig',
         'envvar': 'GAMENIGHT_SETTINGS',
         'config_path': config_path,
-        'envvar_prefix': 'GAMENIGHT_'
+        'envvar_prefix': 'GAMENIGHT_',
+        'matched_envvars': ()
     }
     app.config.from_object(sources['default'])
+
+    cfg = config_from_path(app, config_path)
+    if cfg is not None:
+        # add app configuration and update sources to reflect where we
+        # actually got the config from otherwise it's going to be frustrating
+        # to trackdown what is set by whom
+
+        if isinstance(cfg, (str, Path)):
+            sources['config_path'] = str(cfg)
+            app.config.from_pyfile(cfg)
+        else:
+            sources['config_path'] = _getqualname(obj)
+            app.config.from_object(cfg)
+
+    # configure from the envvar after the explicit path
+    # because its more likely that explicit path is part of
+    # startup script and the envvar has been set to override it
     app.config.from_envvar(sources['envvar'], silent=True)
 
-    if isinstance(config_path, str):
-        if os.path.exists(config_path):
-            app.config.from_pyfile(config_path)
-        elif os.path.sep not in config:
-            app.config.from_object(config_path)
+    # store what was actually pulled out of the envvar
+    sources['envvar'] = os.environ.get(sources['envvar'])
 
-    app.config.update(
-        config_from_env('GAMENIGHT_', frozenset(['GAMENIGHT_SETTINGS']))
+    envvars = config_from_env(
+        'GAMENIGHT_', ignore=frozenset(['GAMENIGHT_SETTINGS'])
     )
+    app.config.update(envvars)
 
-
-def config_from_env(prefix, ignore=frozenset()):
-    config = {}
-    for key, value in os.environ.items():
-        if key.startswith(prefix):
-            try:
-                value = ast.literal_eval(value)
-            except:
-                pass
-            config[key.replace(prefix, '')] = value
-    return config
+    # only store what keys we matched, these could have sensitive data
+    # in them and that would be bad to report out accidentally
+    sources['matched_envvars'] = tuple(envvars.keys())
 
 
 def initialize_extensions(app):
@@ -69,6 +81,7 @@ def register_blueprints(app):
     ]
     for bp in bps:
         app.register_blueprint(bp)
+
 
 def finalize(app):
     FlaskInjector(app, modules=GamenightModule.__subclasses__())
