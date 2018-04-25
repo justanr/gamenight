@@ -7,6 +7,7 @@ from flask import Flask
 from flask_injector import FlaskInjector
 
 from . import blueprints, modules
+from ..core.repository.uow import UnitOfWorkManager
 from .blueprints import GamenightBlueprint
 from .config.find import config_from_env, config_from_path, getqualname
 from .extensions import db
@@ -84,4 +85,15 @@ def register_blueprints(app):
 
 
 def finalize(app):
-    FlaskInjector(app, modules=GamenightModule.__subclasses__())
+    injector = FlaskInjector(app, modules=GamenightModule.__subclasses__())
+    app.injector = injector.injector
+
+    ctx = app.app_context()
+    ctx.push()
+
+    try:
+        uowm = app.injector.get(UnitOfWorkManager)
+        print(f"Configuring {uowm}...")
+        uowm.configure()
+    finally:
+        ctx.pop()

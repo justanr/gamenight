@@ -18,7 +18,7 @@ def config_from_path(app, path=None):
     # no path provided, let's root around in the project directory
     # looking for the default config filename
     if path is None:
-        return root_around(CONFIG_FILE_NAME)
+        return root_around(app, CONFIG_FILE_NAME)
 
     if is_qualname_path(path):
         try:
@@ -31,7 +31,7 @@ def config_from_path(app, path=None):
     if path.absolute().exists():
         return path.absolute()
 
-    cfg = root_around(path)
+    cfg = root_around(app, path)
 
     if cfg is None:
         # throw here because the user explicitly provided a path instead
@@ -41,8 +41,10 @@ def config_from_path(app, path=None):
     return cfg
 
 
-def root_around(filename):
-    return find_in_project_path(filename) or look_in_instance_path(filename)
+def root_around(app, filename):
+    return find_in_project_path(filename) or look_in_instance_path(
+        app, filename
+    )
 
 
 def is_qualname_path(path):
@@ -86,7 +88,6 @@ def _here():
     return Path(os.path.dirname(__file__))
 
 
-
 def config_from_env(prefix, ignore=frozenset()):
     config = {}
     for key, value in os.environ.items():
@@ -107,4 +108,3 @@ def getqualname(obj):
     if isinstance(obj, ModuleType):
         return obj.__package__
     return '.'.join([obj.__module__, obj.__qualname__])
-

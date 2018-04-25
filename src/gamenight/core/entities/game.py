@@ -10,18 +10,19 @@ from typing import List, Optional
 import attr
 
 
-@attr.s
+@attr.s(hash=True, cmp=False, auto_attribs=True)
 class GameTag:
     name: str = attr.ib()
+    id: Optional[int] = attr.ib(default=None)
 
 
-@attr.s
+@attr.s(hash=True, cmp=False, auto_attribs=True)
 class Game:
     name: str = attr.ib()
     description: str = attr.ib()
-    min_players: int = attr.ib()
-    max_players: Optional[int] = attr.ib()
     age: int = attr.ib()
-    tags: List[GameTag] = attr.ib()
+    min_players: int = attr.ib()
+    max_players: Optional[int] = attr.ib(default=None)
+    tags: List[GameTag] = attr.ib(default=attr.Factory(list), hash=False)
     id: Optional[int] = attr.ib(default=None)
 

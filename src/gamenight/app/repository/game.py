@@ -1,96 +1,73 @@
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 
 from injector import inject
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, mapper
 
-from ...core.entities.game import Game as GameEntity
-from ...core.entities.game import GameTag as GameTag_
+from ...core.entities.game import Game, GameTag
 from ...core.repository.games import GameRepo
 from ..extensions import db
 
 
-class Game(db.Model):
-    id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
-    description = Column(String)
-    min_players = Column(Integer)
-    max_players = Column(Integer)
-    age = Column(Integer)
-    gametags = db.relationship('Tag', secondary='game_tag')
-
-    tags = association_proxy(
-        'gametags', 'name', creator=lambda name: Tag.find_or_create(name)
-    )
-
-
-class Tag(db.Model):
-    id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
-
-    @classmethod
-    def find_or_create(cls, name):
-        tag = cls.query.filter(cls.name == name).first()
-        if tag is None:
-            tag = Tag(name=name)
-            db.session.add(tag)
-        return tag
-
-
-class GameTag(db.Model):
-    id = Column(Integer, primary_key=True)
-    game_id = Column(Integer, ForeignKey(Game.id))
-    tag_id = Column(Integer, ForeignKey(Tag.id))
-
-
 class SQLAGameRepo(GameRepo):
+    configured: ClassVar[bool] = False
 
-    @inject
-    def __init__(self, session: Session) -> None:
-        self.session = session
-
-    def fetch(self, id: int) -> GameEntity:
-        game = self.session.query(Game).get(id)
+    def fetch(self, id: int) -> Game:
+        game = db.session.query(Game).get(id)
         if game is None:
             raise Exception('Game not found!!!!')
-        return self._convert_to_domain(game)
+        return game
 
-    def fetch_all(self) -> List[GameEntity]:
-        return [
-            self._convert_to_domain(g)
-            for g in self.session.query(Game).order_by(Game.id).all()
-        ]
+    def fetch_all(self) -> List[Game]:
+        return db.session.query(Game).order_by(Game.id).all()
 
-    def add(self, game: GameEntity) -> None:
-        self.session.add(self._convert_to_model(game))
+    def add(self, game: Game) -> None:
+        db.session.add(game)
 
-    def remove(self, game: GameEntity) -> None:
-        self.session.delete(self.fetch(game.id))
+    def remove(self, game: Game) -> None:
+        db.session.delete(self.fetch(game.id))
 
-    def by_name(self, name: str) -> Optional[GameEntity]:
-        game = self.session.query(Game).filter(Game.name == name).first()
-        if not game:
-            return None
-        return self._convert_to_domain(game)
+    def by_name(self, name: str) -> Optional[Game]:
+        return db.session.query(Game).filter(Game.name == name).first()
 
-    def _convert_to_domain(self, game: Game) -> GameEntity:
-        return GameEntity(
-            id=game.id,
-            name=game.name,
-            description=game.description,
-            min_players=game.min_players,
-            max_players=game.max_players,
-            age=game.age,
-            tags=[GameTag_(name=t) for t in game.tags]
+    @classmethod
+    def configure(cls):
+        if cls.configured:
+            return
+
+        print("Configuring game repo...")
+        super().configure()
+        tags_table = db.Table(
+            'tags',
+            Column('id', Integer, primary_key=True),
+            Column('name', String, unique=True, nullable=False)
         )
 
-    def _convert_to_model(self, game: GameEntity) -> Game:
-        return Game(
-            name=game.name,
-            description=game.description,
-            min_players=game.min_players,
-            max_players=game.max_players,
-            age=game.age,
-            tags=[t for t in game.tags]
+        games_table = db.Table(
+            'games',
+            Column('id', Integer, primary_key=True),
+            Column('name', String, unique=True, nullable=False),
+            Column('description', String, nullable=False),
+            Column('min_players', Integer, nullable=False),
+            Column('max_players', Integer, nullable=True),
+            Column('age', Integer, nullable=True)
         )
+
+        game_tag_table = db.Table(
+            'game_tags',
+            Column('id', Integer, primary_key=True),
+            Column('game_id', Integer, ForeignKey('games.id'), nullable=False),
+            Column('tag_id', Integer, ForeignKey('tags.id'), nullable=False)
+        )
+
+        mapper(GameTag, tags_table)
+        mapper(
+            Game,
+            games_table,
+            properties={
+                'tags': db.relationship(GameTag, secondary=game_tag_table)
+            }
+        )
+
+        cls.configured = True

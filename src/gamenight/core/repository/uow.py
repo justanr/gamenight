@@ -2,6 +2,10 @@ from abc import ABC, abstractmethod, abstractproperty
 from .games import GameRepo
 
 
+class UnitOfWorkError(Exception):
+    pass
+
+
 class UnitOfWork(ABC):
     @abstractmethod
     def commit(self) -> bool:

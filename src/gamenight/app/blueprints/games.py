@@ -3,7 +3,7 @@ from flask import Response, jsonify
 from flask.views import MethodView
 from injector import inject
 
-from ...core.repository.games import GameRepo
+from ...core.repository.uow import UnitOfWorkManager
 from ._helpers import GamenightBlueprint
 
 games = GamenightBlueprint('games', __name__, url_prefix='/games')
@@ -12,11 +12,13 @@ games = GamenightBlueprint('games', __name__, url_prefix='/games')
 class GamesView(MethodView):
 
     @inject
-    def __init__(self, games: GameRepo) -> None:
-        self.games = games
+    def __init__(self, uowm: UnitOfWorkManager) -> None:
+        self.uowm = uowm
 
     def get(self):
-        games = self.games.fetch_all()
+        with self.uowm.start() as uow:
+            games = uow.games.fetch_all()
+
         return jsonify({
             'metadata': {
                 'total': len(games)
@@ -28,11 +30,13 @@ class GamesView(MethodView):
 class SpecificGameView(MethodView):
 
     @inject
-    def __init__(self, games: GameRepo) -> None:
-        self.games = games
+    def __init__(self, uowm: UnitOfWorkManager) -> None:
+        self.uowm = uowm
 
     def get(self, id: int) -> Response:
-        game = self.games.fetch(id)
+        with self.uowm.start() as uow:
+            game = uow.games.fetch(id)
+
         return jsonify({'game': attr.asdict(game)})
 
 

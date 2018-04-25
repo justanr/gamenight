@@ -1,32 +1,31 @@
-from abc import ABC, abstractmethod
-from typing import Generic, List, TypeVar
+from abc import abstractmethod
+from typing import Generic
 
-import attr
+from injector import inject
 
 from ..entities.game import Game
-
-RemoteGameIDType = TypeVar('RemoteGameIDType')
-
-
-@attr.s
-class RemoteGame(Generic[RemoteGameIDType]):
-    id: RemoteGameIDType = attr.ib()
-    name: str = attr.ib()
+from ..repository.uow import UnitOfWorkManager
+from .remote import GameImporter, RemoteGameIDType, RemoteGameSearch
 
 
-class GameImporter(ABC, Generic[RemoteGameIDType]):
+class DefaultGameImporter(GameImporter):
 
-    @abstractmethod
+    @inject
+    def __init__(
+            self, uowm: UnitOfWorkManager, search: RemoteGameSearch
+    ) -> None:
+        self._uowm = uowm
+        self._search = search
+
     def import_game(self, id: RemoteGameIDType) -> Game:
-        pass
+        game = self._search.retrieve(id)
 
+        with self._uowm.start() as uow:
+            exists = uow.games.by_name(game.name)
 
-class RemoteGameSearch(ABC, Generic[RemoteGameIDType]):
+            if exists:
+                return exists
 
-    @abstractmethod
-    def search(self, query: str) -> List[RemoteGame[RemoteGameIDType]]:
-        pass
-
-    @abstractmethod
-    def retrieve(self, id: RemoteGameIDType) -> Game:
-        pass
+            uow.games.add(game)
+            uow.commit()
+            return game
