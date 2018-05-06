@@ -1,9 +1,8 @@
 from typing import ClassVar, List, Optional
 
-from injector import inject
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import Session, mapper
+from sqlalchemy.orm import mapper
 
 from ...core.entities.game import Game, GameTag
 from ...core.repository.games import GameRepo
@@ -36,7 +35,6 @@ class SQLAGameRepo(GameRepo):
         if cls.configured:
             return
 
-        print("Configuring game repo...")
         super().configure()
         tags_table = db.Table(
             'tags',
@@ -66,8 +64,22 @@ class SQLAGameRepo(GameRepo):
             Game,
             games_table,
             properties={
-                'tags': db.relationship(GameTag, secondary=game_tag_table)
+                '_tags': db.relationship(GameTag, secondary=game_tag_table)
             }
         )
 
+        Game.tags = association_proxy(
+            '_tags', 'name', creator=cls._find_or_create_tag
+        )
+
         cls.configured = True
+
+    @staticmethod
+    def _find_or_create_tag(name):
+        tag = db.session.query(GameTag).filter(GameTag.name == name).first()
+
+        if tag is None:
+            tag = GameTag(name=name)
+            db.session.add(tag)
+
+        return tag

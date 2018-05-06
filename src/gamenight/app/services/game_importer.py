@@ -33,6 +33,6 @@ class BoardGameGeekSearch(RemoteGameSearch[BGGGameIdType]):
             min_players=item.min_players,
             max_players=item.max_players,
             age=item.min_age,
-            tags=[GameTag(m) for m in item.mechanics],
+            tags=item.mechanics,
             description=item.description,
         )

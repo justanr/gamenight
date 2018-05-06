@@ -23,6 +23,6 @@ class Game:
     age: int = attr.ib()
     min_players: int = attr.ib()
     max_players: Optional[int] = attr.ib(default=None)
-    tags: List[GameTag] = attr.ib(default=attr.Factory(list), hash=False)
+    tags: List[str] = attr.ib(default=attr.Factory(list), hash=False)
     id: Optional[int] = attr.ib(default=None)
 

@@ -93,7 +93,6 @@ def finalize(app):
 
     try:
         uowm = app.injector.get(UnitOfWorkManager)
-        print(f"Configuring {uowm}...")
         uowm.configure()
     finally:
         ctx.pop()

@@ -39,6 +39,5 @@ class SQLAUnitOfWorkManager(UnitOfWorkManager):
         if cls.configured:
             return
 
-        print("Configuring SQLA UoW Manager...")
         super().configure()
         SQLAGameRepo.configure()

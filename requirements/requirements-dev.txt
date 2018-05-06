@@ -2,3 +2,5 @@
 -rrequirements-docs.txt
 tox==3.0.0
 bumpversion==0.5.3
+jupyter==1.0.0
+jupyterlab==0.32.1
