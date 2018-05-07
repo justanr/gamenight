@@ -1,7 +1,7 @@
 from abc import abstractmethod
-from typing import Generic, List, Optional, TypeVar
+from typing import Generic, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class Repo(Generic[T]):

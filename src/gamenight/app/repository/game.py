@@ -1,6 +1,5 @@
 from typing import Any, ClassVar, List, Optional
 
-import attr
 from sqlalchemy import Column, ForeignKey, Integer, String, func
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import mapper

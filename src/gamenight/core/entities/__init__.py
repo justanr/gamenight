@@ -5,4 +5,4 @@
 
 """
 
-from .game import Game
+from .game import Game, GameTag  # noqa: F401

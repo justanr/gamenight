@@ -1,5 +1,4 @@
-import attr
-from flask import Response, request
+from flask import Response
 from flask.views import MethodView
 from injector import inject
 from webargs.flaskparser import use_args

@@ -1,13 +1,15 @@
+import ast
 import os
 import re
 from pathlib import Path
+from types import ModuleType
 
 from werkzeug.utils import ImportStringError, import_string
 
 # probably not 100% accurate but should be good enough
-_QUALNAME_RE = re.compile(r'^([_a-zA-Z]\w+\.?)+$')
+_QUALNAME_RE = re.compile(r"^([_a-zA-Z]\w+\.?)+$")
 
-CONFIG_FILE_NAME = 'gamenight.cfg'
+CONFIG_FILE_NAME = "gamenight.cfg"
 
 
 class ConfigurationError(Exception):
@@ -42,9 +44,7 @@ def config_from_path(app, path=None):
 
 
 def root_around(app, filename):
-    return find_in_project_path(filename) or look_in_instance_path(
-        app, filename
-    )
+    return find_in_project_path(filename) or look_in_instance_path(app, filename)
 
 
 def is_qualname_path(path):
@@ -97,14 +97,14 @@ def config_from_env(prefix, ignore=frozenset()):
         if key.startswith(prefix):
             try:
                 value = ast.literal_eval(value)
-            except:
+            except Exception:
                 pass
             else:
-                config[key.replace(prefix, '')] = value
+                config[key.replace(prefix, "")] = value
     return config
 
 
 def getqualname(obj):
     if isinstance(obj, ModuleType):
         return obj.__package__
-    return '.'.join([obj.__module__, obj.__qualname__])
+    return ".".join([obj.__module__, obj.__qualname__])

@@ -25,4 +25,3 @@ class Game:
     max_players: Optional[int] = attr.ib(default=None)
     tags: List[str] = attr.ib(default=attr.Factory(list), hash=False)
     id: Optional[int] = attr.ib(default=None)
-

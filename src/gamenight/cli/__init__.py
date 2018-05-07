@@ -1,1 +1,1 @@
-from .group import gamenight
+from .group import gamenight  # noqa: F401

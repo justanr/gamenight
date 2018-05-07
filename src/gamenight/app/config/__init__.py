@@ -1,1 +1,1 @@
-from .default import DefaultGameNightConfig
+from .default import DefaultGameNightConfig  # noqa: F401

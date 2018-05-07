@@ -1,6 +1,5 @@
-from collections.abc import Mapping
-from functools import partial, wraps
-from typing import Any, Callable, Type, Union
+from functools import wraps
+from typing import Type, Union
 
 from flask import jsonify
 from flask.wrappers import Response

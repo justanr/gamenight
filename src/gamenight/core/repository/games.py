@@ -13,9 +13,9 @@ class GameSearchParams:
     # game attrs
     name: Optional[str] = attr.ib(default="")
     description: Optional[str] = attr.ib(default="")
-    age: Optional[List[int]] = attr.ib(default=attr.Factory(list))
-    players: Optional[List[int]] = attr.ib(default=attr.Factory(list))
-    tags: Optional[List[str]] = attr.ib(default=attr.Factory(list))
+    age: List[int] = attr.ib(default=attr.Factory(list))
+    players: List[int] = attr.ib(default=attr.Factory(list))
+    tags: List[str] = attr.ib(default=attr.Factory(list))
 
     # pagination controls
     page_size: Optional[int] = attr.ib(default=100)
