@@ -8,6 +8,9 @@ from marshmallow import Schema
 from marshmallow.class_registry import get_class as get_schema
 
 
+SCHEMA_LOOKUP_TYPE = Union[Type[Schema], Schema, str]
+
+
 def _unpack_for_serialization(resp):
     if not isinstance(resp, tuple):
         return resp, None, None
@@ -15,7 +18,7 @@ def _unpack_for_serialization(resp):
     return (resp + (None, None))[:3]
 
 
-def serialize_with(f=None, *, schema: Union[Type[Schema], Schema, str], **kwargs):
+def serialize_with(f=None, *, schema: SCHEMA_LOOKUP_TYPE, **kwargs):
     if f is None:
         return lambda f: serialize_with(f, schema=schema, **kwargs)
 

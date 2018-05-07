@@ -1,10 +1,11 @@
 attrs==17.4.0
 boardgamegeek==0.13.2
-flask==1.0.2
 flask-alembic==2.0.1
 flask-injector==0.10.1
 flask-sqlalchemy==2.3.2
+flask==1.0.2
 injector==0.13.4
-marshmallow==2.15.0
 marshmallow-annotations==2.0.0
+marshmallow==2.15.0
 sqlalchemy==1.2.7
+webargs==3.0.0

@@ -1,10 +1,11 @@
 import attr
-from flask import Response
+from flask import Response, request
 from flask.views import MethodView
 from injector import inject
+from webargs.flaskparser import use_args
 
 from ...core.repository.uow import UnitOfWorkManager
-from ..serialization import GameSchema, serialize_with
+from ..serialization import GameSchema, GameSearchParamsSchema, serialize_with
 from ._helpers import GamenightBlueprint
 
 games = GamenightBlueprint("games", __name__, url_prefix="/games")
@@ -16,10 +17,11 @@ class GamesView(MethodView):
     def __init__(self, uowm: UnitOfWorkManager) -> None:
         self.uowm = uowm
 
+    @use_args(GameSearchParamsSchema, locations=("query",))
     @serialize_with(schema=GameSchema, many=True)
-    def get(self):
+    def get(self, params: GameSearchParamsSchema):
         with self.uowm.start() as uow:
-            games = uow.games.fetch_all()
+            games = uow.games.search(params)
 
         return games, 200
 

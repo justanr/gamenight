@@ -18,10 +18,6 @@ class Repo(Generic[T]):
     def remove(self, entity: T) -> None:
         pass
 
-    @abstractmethod
-    def fetch_all(self) -> List[T]:
-        pass
-
     @classmethod
     def configure(cls):
         pass

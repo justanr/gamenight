@@ -1,2 +1,2 @@
-from .game import GameSchema
+from .game import GameSchema, GameSearchParamsSchema
 from .helpers import serialize_with
