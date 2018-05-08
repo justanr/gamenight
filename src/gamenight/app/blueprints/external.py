@@ -5,6 +5,7 @@ from injector import inject
 
 from ...core.services.importer import GameImporter, RemoteGameSearch
 from ._helpers import GamenightBlueprint
+from ..serialization import GameSchema, serialize_with
 
 external = GamenightBlueprint('external', __name__, url_prefix='/external')
 
@@ -43,9 +44,9 @@ class RemoteGameImport(MethodView):
     def __init__(self, importer: GameImporter) -> None:
         self.importer = importer
 
+    @serialize_with(schema=GameSchema)
     def post(self, id):
-        result = self.importer.import_game(id)
-        return jsonify({'game': attr.asdict(result)})
+        return self.importer.import_game(id)
 
 
 external.add_url_rule('/', view_func=ExternalGameSearch.as_view('search'))

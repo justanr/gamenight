@@ -18,10 +18,7 @@ class BoardGameGeekSearch(RemoteGameSearch[BGGGameIdType]):
     def search(self, query: str) -> List[RemoteGame[BGGGameIdType]]:
         if not query:
             return []
-        return [
-            RemoteGame(id=r.id, name=r.name)
-            for r in self.client.search(query)
-        ]
+        return [RemoteGame(id=r.id, name=r.name) for r in self.client.search(query)]
 
     def retrieve(self, id: BGGGameIdType) -> Game:
         result = self.client.game(game_id=id)
