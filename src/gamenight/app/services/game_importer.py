@@ -4,7 +4,7 @@ from boardgamegeek import BoardGameGeek
 from injector import inject
 
 from ...core.entities.game import Game
-from ...core.services.remote import RemoteGame, RemoteGameSearch
+from ...core.importer import RemoteGame, RemoteGameSearch
 
 BGGGameIdType = int
 

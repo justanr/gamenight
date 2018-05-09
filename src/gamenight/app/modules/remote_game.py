@@ -1,8 +1,11 @@
 from boardgamegeek import BoardGameGeek
 from injector import provider
 
-from ...core.services.importer import DefaultGameImporter
-from ...core.services.remote import GameImporter, RemoteGameSearch
+from ...core.importer import (
+    DefaultGameImporter,
+    GameImporter,
+    RemoteGameSearch,
+)
 from ..services.game_importer import BoardGameGeekSearch
 from ._helpers import GamenightModule
 

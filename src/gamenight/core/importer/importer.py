@@ -2,7 +2,7 @@ from injector import inject
 
 from ..entities.game import Game
 from ..repository.uow import UnitOfWorkManager
-from .remote import GameImporter, RemoteGameIDType, RemoteGameSearch
+from .base import GameImporter, RemoteGameIDType, RemoteGameSearch
 
 
 class DefaultGameImporter(GameImporter):

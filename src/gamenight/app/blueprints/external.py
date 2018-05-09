@@ -3,7 +3,7 @@ from flask import jsonify, request
 from flask.views import MethodView
 from injector import inject
 
-from ...core.services.importer import GameImporter, RemoteGameSearch
+from ...core.importer import GameImporter, RemoteGameSearch
 from ._helpers import GamenightBlueprint
 from ..serialization import GameSchema, serialize_with
 
