@@ -2,7 +2,7 @@ from marshmallow import post_load
 from marshmallow_annotations import AnnotationSchema
 
 from ...core.entities.game import Game
-from ...core.repository.games import GameSearchParams
+from ...core.repository.game import GameSearchParams
 
 
 class GameSchema(AnnotationSchema):

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod, abstractproperty
-from .games import GameRepo
+from .game import GameRepo
 
 
 class UnitOfWorkError(Exception):

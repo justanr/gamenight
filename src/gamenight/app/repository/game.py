@@ -5,7 +5,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import mapper
 
 from ...core.entities.game import Game, GameTag
-from ...core.repository.games import GameRepo, GameSearchParams
+from ...core.repository.game import GameRepo, GameSearchParams
 from ..extensions import db
 
 
